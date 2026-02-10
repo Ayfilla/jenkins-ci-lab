@@ -1,5 +1,5 @@
 pipeline {
-    agent none
+    agent any
 
     options {
         timestamps()
@@ -9,28 +9,27 @@ pipeline {
     stages {
 
         stage('Checkout') {
-            agent any
             steps {
                 git branch: 'main',
                     url: 'https://github.com/Ayfilla/jenkins-ci-lab.git'
             }
         }
 
-        stage('Build on mac-agent') {
-            agent { label 'mac-agent' }
+        stage('Build') {
             steps {
                 sh '''
                   echo "Build stage"
+                  chmod +x app/app.sh
                   ./app/app.sh
                 '''
             }
         }
 
-        stage('Test on node-mac1') {
-            agent { label 'node-mac1' }
+        stage('Test') {
             steps {
                 sh '''
                   echo "Test stage"
+                  chmod +x tests/test.sh
                   ./tests/test.sh
                 '''
             }
