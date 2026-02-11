@@ -1,51 +1,49 @@
 pipeline {
     agent any
 
-    options {
-        timestamps()
-        disableConcurrentBuilds()
+    triggers {
+        githubPush()
     }
 
     stages {
-
         stage('Checkout') {
             steps {
-                git branch: 'main',
-                    url: 'https://github.com/Ayfilla/jenkins-ci-lab.git'
+                checkout scm
             }
         }
 
-        stage('Build') {
-            steps {
-                sh '''
-                  echo "Build stage"
-                  chmod +x app/app.sh
-                  ./app/app.sh
-                '''
-            }
-        }
+        stage('Parallel Jobs') {
+            parallel {
+                stage('Lint') {
+                    steps {
+                        echo 'Running lint'
+                        sleep 3
+                    }
+                }
 
-        stage('Test') {
-            steps {
-                sh '''
-                  echo "Test stage"
-                  chmod +x tests/test.sh
-                  ./tests/test.sh
-                '''
+                stage('Unit Tests') {
+                    steps {
+                        echo 'Running unit tests'
+                        sleep 5
+                    }
+                }
+
+                stage('Build') {
+                    steps {
+                        echo 'Building application'
+                        sleep 4
+                    }
+                }
             }
         }
     }
 
     post {
         success {
-            echo "Pipeline SUCCESS"
+            echo 'Pipeline completed successfully'
         }
         failure {
-            echo "Pipeline FAILED"
-        }
-        always {
-            cleanWs()
+            echo 'Pipeline failed'
         }
     }
 }
-
